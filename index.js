@@ -1,127 +1,102 @@
 const express = require('express');
-const Producto = require('./Modelos/Producto');
+const cors = require('cors');
+const Carrito = require('./Modelos/Carrito');
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 
-app.get('/productos', async (req, res) => {
+app.get('/carrito', async (req, res) => {
 
     try {
 
 
-        const productos= await Producto.findAll();
+        const carrito= await Carrito.findAll();
 
-        if(productos.length > 0){
-            res.status(200).json({
-                message: 'Productos obtenidos correctamente',
-                data: productos,
-            });
+        if(carrito.length > 0){
+            res.status(200).json({ message: 'El carrito se obtuvo correctamente',data: carrito});
         }else{
-            res.status(400).json({
-                message: 'No hay productos',
-                data: [],
-            });
+            res.status(400).json({message: 'No hay productos en el carrito',data: []});
         }
         
 
 
     } catch (error) {
-        res.status(500).json({
-            message: 'Error al obtener los productos',
-            error: error.message,
-        });
+        res.status(500).json({message: 'Error al obtener el carrito',error: error.message});
     }
 
 });
 
 
-app.post('/productos', async (req, res) => {
+app.post('/carrito', async (req, res) => {
+  try {
+    const { idproducto, isvProducto, ordenCompra } = req.body;
+
+    const nuevoCarrito = await Carrito.create({
+      idproducto,isvProducto,ordenCompra
+    });
+
+    res.status(201).json({message: 'Producto agregado al carrito correctamente',data: nuevoCarrito});
+
+  } catch (error) {
+    res.status(500).json({message: 'Error al agregar producto al carrito',error: error.message});
+  }
+});
+
+app.put('/carrito/:id', async (req, res) => {
 
     try {
 
-        const producto = await Producto.create(req.body);
+        const [carrito] = await Carrito.update(req.body, {
 
-        if(producto){
-            res.status(200).json({
-                message: 'Producto creado correctamente',
-                data: producto,
-            });
+            where: {idcarrito: req.params.id, },
+        });
+
+        if(carrito){
+
+            res.status(200).json({message: 'Producto actualizado correctamente',data: carrito});
+
         }else{
-            res.status(400).json({
-                message: 'Error al crear producto',
-                data: [],
-            });
+
+            res.status(400).json({message: 'Error al actualizar producto',data: []});
+
         }
-    
 
     } catch (error) {
-        res.status(500).json({
-            message: 'Error al crear productos',
-            error: error.message,
-        });
+
+        res.status(500).json({message: 'Error al actualizar producto',error: error.message});
+
     }
 
 });
 
-app.put('/productos/:id', async (req, res) => {
+
+app.delete('/carrito/:id', async (req, res) => {
+
     try {
 
+        const carrito = await Carrito.destroy({
 
-        const [producto] = await Producto.update(req.body, {
-            where: {
-                id: req.params.id,
-            },
+            where: {idcarrito: req.params.id,},
+
         });
 
-        if(producto ){
-            res.status(200).json({
-                message: 'Producto actualizado correctamente',
-                data: producto,
-            });
+        if(carrito){
+
+            res.status(200).json({message: 'Producto eliminado correctamente',data: carrito});
         }else{
-            res.status(400).json({
-                message: 'Error al actualizar producto',
-                data: [],
-            });
+
+            res.status(400).json({message: 'Error al eliminar producto',data: []});
+
         }
-        
+
     } catch (error) {
-        res.status(500).json({
-            message: 'Error al actualizar productos',
-            error: error.message,
-        });
+
+        res.status(500).json({message: 'Error al eliminar producto',error: error.message});
+
     }
-})
 
-
-app.delete('/productos/:id', async (req, res) => {
-    try {
-
-
-        const producto = await Producto.destroy({
-            where: {
-                id: req.params.id,
-            },
-        });
-        
-        if(producto){
-            res.status(200).json({
-                message: 'Producto eliminado correctamente',
-                data: producto,
-            });
-        }else{
-            res.status(400).json({
-                message: 'Error al eliminar producto',
-                data: [],
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error al actualizar productos',
-            error: error.message,
-        });
-    }
-})
+});
 
 app.listen(5000, () => {
     console.log('Server is running on port 5000');

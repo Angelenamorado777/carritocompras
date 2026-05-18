@@ -1,9 +1,9 @@
 const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize(
-    'carritodecompras',
+    'carrito_db',
     'root',
-    'angel123',
+    'R00tP4ssw0rd',
     {
         host: 'localhost',
         port: 3306,
